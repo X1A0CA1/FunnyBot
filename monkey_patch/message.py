@@ -8,4 +8,12 @@ def link(self) -> str:
         return f"https://t.me/c/{utils.get_channel_id(self.chat.id)}/{self.id}"
 
 
+def __eq__(self, other) -> bool:
+    if isinstance(other, Message):
+        return self.id == other.id
+    else:
+        return False
+
+
 setattr(Message, "link", property(link))
+setattr(Message, "__eq__", __eq__)

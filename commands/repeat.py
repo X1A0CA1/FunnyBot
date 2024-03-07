@@ -37,14 +37,13 @@ class MessageList(list):
     def remove(self, item: Message) -> None:
         super(MessageList, self).remove(item)
 
-    def replace(self, item: Message | int, new_item: Message) -> None:
-        if isinstance(item, int):
-            index = item
-        elif isinstance(item, Message):
-            index = self.index(item)
-        else:
-            raise TypeError("item should be either an integer or a Message object")
-        self[index] = new_item
+    def update(self, item: Message) -> None:
+        if not isinstance(item, Message):
+            raise ValueError("item must be a Message")
+        for index, message in enumerate(self):
+            if message.id == item.id:
+                self[index] = item
+                return
 
     def _trim_list(self) -> None:
         if len(self) > self.max_size:
@@ -62,12 +61,19 @@ class MessageList(list):
         # 如果连续三条消息都一样，就需要复读
         return compare_messages(self[:3])
 
+    async def try_repeat(self) -> None:
+        if self.need_repeat():
+            message = self[0]
+            repeat_message = await message.forward(message.chat.id)
+            self.repeated = repeat_message
+            self.append(repeat_message)
+
 
 GROUP_LIST = {}
 
 
 @Client.on_message((filters.text | filters.sticker) & filters.group, group=10)
-async def repeater(_: Client, message: Message):
+async def message_handler(_: Client, message: Message):
     chat_messages: MessageList = GROUP_LIST.get(message.chat.id, None)
     if chat_messages:
         chat_messages.append(message)
@@ -76,8 +82,12 @@ async def repeater(_: Client, message: Message):
         GROUP_LIST[message.chat.id].append(message)
         return
 
-    if chat_messages.need_repeat():
-        msg = chat_messages[0]
-        repeat_message = await msg.forward(message.chat.id)
-        chat_messages.repeated = repeat_message
-        chat_messages.append(message)
+    await chat_messages.try_repeat()
+
+
+@Client.on_edited_message((filters.text | filters.sticker) & filters.group, group=11)
+async def edit_handler(_: Client, message: Message):
+    chat_messages: MessageList = GROUP_LIST.get(message.chat.id, None)
+    if message in chat_messages:
+        chat_messages.update(message)
+        await chat_messages.try_repeat()
