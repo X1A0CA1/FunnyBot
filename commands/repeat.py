@@ -66,7 +66,8 @@ class MessageList(list):
 GROUP_LIST = {}
 
 
-async def repeater(message: Message):
+@Client.on_message((filters.text | filters.sticker) & filters.group, group=10)
+async def repeater(_: Client, message: Message):
     chat_messages: MessageList = GROUP_LIST.get(message.chat.id, None)
     if chat_messages:
         chat_messages.append(message)
@@ -80,13 +81,3 @@ async def repeater(message: Message):
         repeat_message = await msg.forward(message.chat.id)
         chat_messages.repeated = repeat_message
         chat_messages.append(message)
-
-
-@Client.on_message(filters.text & filters.group, group=10)
-async def text_handler(_, message: Message):
-    await repeater(message)
-
-
-@Client.on_message(filters.sticker & filters.group, group=11)
-async def sticker_handler(_, message: Message):
-    await repeater(message)
