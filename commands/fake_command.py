@@ -23,7 +23,7 @@ ACTIONS = {
 }
 
 
-@Client.on_message(filters.group & filters.text & filters.regex(r"^[!！].+"))
+@Client.on_message(filters.group & filters.text & filters.regex(r"^[!！].+"), group=100)
 async def fake_command(client: Client, message: Message):
     if not message.reply_to_message:
         message.reply_to_message = message
