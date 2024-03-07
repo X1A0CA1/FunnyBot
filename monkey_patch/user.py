@@ -3,7 +3,7 @@ from pyrogram.types.user_and_chats.user import User, Link
 from utils import contains_only_special_whitespace
 
 
-def full_name(self):
+def full_name(self) -> str:
     if self.last_name:
         fullname = f"{self.first_name} {self.last_name}"
     else:
@@ -13,7 +13,7 @@ def full_name(self):
     return fullname
 
 
-def mention(self):
+def mention(self) -> Link:
     return Link(
         f"tg://user?id={self.id}",
         self.full_name or "Deleted Account",
