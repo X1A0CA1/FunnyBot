@@ -1,4 +1,3 @@
-import re
 from copy import deepcopy
 
 from pyrogram import Client, filters
@@ -42,23 +41,24 @@ async def fake_command(client: Client, message: Message):
             'from_user_name': sender.mention,
             'target_user_name': target_sender.mention
         })
-        await client.send_message(
+        return await client.send_message(
             chat_id=message.chat.id,
             reply_to_message_id=message.id,
             text=text
         )
+
+    parts = action.split(' ', 1)
+    # 如果分割后长度为2，将第一个部分视为动作，第二个部分视为对象
+    if len(parts) == 2:
+        action, what = parts
+        text = f"{sender.mention} {action.rstrip('了')}了 {target_sender.mention} {what.rstrip('!')}!"
     else:
-        match = re.fullmatch(r"(.+) (.+)", message.text)
-        if match:
-            action = match.group(1)
-            what = match.group(2)
-            await client.send_message(
-                chat_id=message.chat.id,
-                reply_to_message_id=message.id,
-                text=f'{sender.mention} {action} {target_sender.mention} {what}!')
-        else:
-            await client.send_message(
-                chat_id=message.chat.id,
-                reply_to_message_id=message.id,
-                text=f'{sender.mention} {action} {target_sender.mention}!'
-            )
+        # 如果无法分割，将整个字符串视为动作
+        action = parts[0].rstrip('了')  # 干掉动作末尾的了
+        text = f"{sender.mention} {action}了 {target_sender.mention}!"
+
+    await client.send_message(
+        chat_id=message.chat.id,
+        reply_to_message_id=message.id,
+        text=text
+    )
