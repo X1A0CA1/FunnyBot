@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 
 from pyrogram import Client, filters
 from pyrogram.types import Message
@@ -23,17 +24,14 @@ ACTIONS = {
 }
 
 
-@Client.on_message(filters.group & filters.text)
+@Client.on_message(filters.group & filters.text & filters.regex(r"^[!！].+"))
 async def fake_command(client: Client, message: Message):
-    if not message.text:
-        return
-    if not message.text.startswith("!") and not message.text.startswith("！"):
-        return
     if not message.reply_to_message:
         message.reply_to_message = message
 
     sender = message.from_user or message.sender_chat
-    target_sender = message.reply_to_message.from_user or message.reply_to_message.sender_chat
+    target_sender = deepcopy(message.reply_to_message.from_user) or deepcopy(message.reply_to_message.sender_chat)
+    target_sender._client = client
     if sender.id == target_sender.id:
         target_sender.first_name = '自己'
         target_sender.last_name = ''
