@@ -16,7 +16,7 @@ def mention(self) -> Link:
     if self.username:
         return Link(
             f"https://t.me/{self.username}",
-            self.title,
+            self.full_name,
             self._client.parse_mode
         )
     else:
@@ -26,7 +26,7 @@ def mention(self) -> Link:
 
         return Link(
             f"tg://privatepost?channel={chat_id}&post=-1",
-            self.title,
+            self.full_name,
             self._client.parse_mode
         )
 
