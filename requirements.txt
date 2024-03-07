@@ -1,0 +1,6 @@
+PyroFork==2.3.19.post2
+PyYAML~=6.0.1
+APScheduler~=3.10.4
+pytz~=2024.1
+cn2an~=0.5.22
+TgCrypto
