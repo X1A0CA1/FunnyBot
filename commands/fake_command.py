@@ -1,7 +1,7 @@
-from copy import deepcopy
-
 from pyrogram import Client, filters
 from pyrogram.types import Message
+
+from utils import get_sender_and_target_from_message
 
 
 ACTIONS = {
@@ -28,12 +28,7 @@ async def fake_command(client: Client, message: Message):
     if not message.reply_to_message:
         message.reply_to_message = message
 
-    sender = message.from_user or message.sender_chat
-    target_sender = deepcopy(message.reply_to_message.from_user) or deepcopy(message.reply_to_message.sender_chat)
-    target_sender._client = client
-    if sender.id == target_sender.id:
-        target_sender.first_name = '自己'
-        target_sender.last_name = ''
+    sender, target_sender = await get_sender_and_target_from_message(message)
 
     action = message.text[1:]
     if action in ACTIONS:
