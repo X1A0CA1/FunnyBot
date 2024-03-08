@@ -1,0 +1,11 @@
+#file: noinspection SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection
+# bot 设置
+api_id: ""
+api_hash: ""
+bot_name: ""  # bot 的名字，不是用户名
+bot_username: ""  # bot 的用户名。不要带@， 不要带@， 不要带@，全小写
+bot_token: ""
+
+time_zone: "Asia/Shanghai"
+
+# 将本文件正确填写后，重命名为 config.yml 即可。
