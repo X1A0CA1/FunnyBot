@@ -1,3 +1,5 @@
+import asyncio
+
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
@@ -23,6 +25,7 @@ class MessageList(list):
     def __init__(self, max_size=10, *args, **kwargs) -> None:
         self.max_size = max_size
         self.repeated = Message(id=0)
+        self.lock = False
         super(MessageList, self).__init__(*args, **kwargs)
 
     def append(self, item: Message) -> None:
@@ -36,12 +39,14 @@ class MessageList(list):
 
     def remove(self, item: Message) -> None:
         super(MessageList, self).remove(item)
+        self._trim_list()
 
     def remove_by_message_id(self, message_id: int) -> None:
         for message in self:
             if message.id == message_id:
                 self.remove(message)
                 return
+        self._trim_list()
 
     def update(self, item: Message) -> None:
         if not isinstance(item, Message):
@@ -52,6 +57,7 @@ class MessageList(list):
                 return
 
     def _trim_list(self) -> None:
+        self.sort(key=lambda x: x.id, reverse=True)
         if len(self) > self.max_size:
             del self[self.max_size:]
 
@@ -85,12 +91,16 @@ class MessageList(list):
                 self.remove_by_message_id(message.id)
 
     async def try_repeat(self, client: Client) -> None:
+        while self.lock:
+            await asyncio.sleep(.1)
+        self.lock = True
         await self.update_messages(client)
         if self.need_repeat():
             message = self[0]
             repeat_message = await message.forward(message.chat.id)
             self.repeated = repeat_message
             self.append(repeat_message)
+        self.lock = False
 
 
 GROUP_LIST = {}
