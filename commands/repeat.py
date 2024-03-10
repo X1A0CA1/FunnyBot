@@ -53,7 +53,7 @@ class MessageList(list):
 
     def _trim_list(self) -> None:
         if len(self) > self.max_size:
-            del self[:len(self) - self.max_size]
+            del self[self.max_size:]
 
     def need_repeat(self) -> bool:
         # 至少需要三条消息
