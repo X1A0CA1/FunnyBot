@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 
 from pyrogram import Client, filters
 from pyrogram.types import Message
@@ -85,7 +86,14 @@ class MessageList(list):
         message_ids: List[int] = [message.id for message in self]
         if not message_ids:
             return
-        messages = await client.get_messages(self[0].chat.id, message_ids)
+        try:
+            messages = await client.get_messages(self[0].chat.id, message_ids)
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
+            print(self)
+            print(message_ids)
+            return
         for message in messages:
             if message.empty:
                 self.remove_by_message_id(message.id)
